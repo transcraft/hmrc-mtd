@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/css/mtd.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/mtd.js"></script>
+    <script src="/js/qr.js"></script>
+    <title>[<%= locals.mtdEnv %>] Set up new user</title>
+</head>
+<body>
+
+<h2><span class="<%= locals.mtdEnv %>">[<%= locals.mtdEnv %>]</span> Create a new user</h2>
+
+<%- include _error.ejs %>
+
+<p><b>Note: </b> Once you have entered your user name and password, <b>please ensure you set up the generated
+        QR code</b> in your favourite Authenticator app, or at least take a screenshot of it to set up later, or you will not be
+able to login back into the site</p>
+
+<form method="post">
+    <div><label><b>User name</b></label></div><div> <input id="username" name="username" value="<%=locals.req?locals.req.body.username:''%>"></div>
+    <div><label><b>Password</b></label></div><div> <input type="password" id="secret" name="secret"></div>
+    <div><label><b>Password (again)</b></label></div><div> <input type="password" id="secret2" name="secret2"></div>
+    <div><label><b>Email</b></label></div><div> <input id="email" name="email" value="<%=locals.req?locals.req.body.email:''%>"></div>
+    <div><label><b>Have you scanned the QR code into your authenticator app?</b></label></div><div>
+        <input type='checkbox' id="qrDone" name="qrDone"></div>
+    <div><input type="submit" value="Create"/></div>
+    <% if (locals.recaptchaKey) { %>
+        <div class="g-recaptcha" data-sitekey="<%= locals.recaptchaKey %>"></div>
+    <% } %>
+</form>
+
+<%- include _qr.ejs %>
+
+</body>
+</html>

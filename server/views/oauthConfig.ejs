@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>[<%= mtdEnv %>] Open Authentication Configuration</title>
+    <link rel="stylesheet" href="/css/mtd.css">
+    <script src="/js/mtd.js"></script>
+</head>
+<body>
+
+<%- include _menu.ejs %>
+
+
+<h2><span class="<%= locals.mtdEnv %>">[<%= locals.mtdEnv %>]</span> Open Authentication Configuration</h2>
+
+<%- include _error.ejs %>
+
+<form method="post">
+    <div class="config">
+     <b>API host</b>
+        <select name="host">
+            <option <%=locals.oauth && locals.oauth.host === 'Test'? 'selected':''%>>Test</option>
+            <option <%=locals.oauth && locals.oauth.host === 'Live'? 'selected':''%>>Live</option>
+            </select>
+    <b>clientId</b> <input name="clientId" value="<%=locals.oauth?locals.oauth.clientId:''%>"/>
+    <b>clientSecret</b> <input name="clientSecret" value="<%=locals.oauth?locals.oauth.clientSecret:''%>"/>
+    <b>serverToken</b> <input name="serverToken" value="<%=locals.oauth?locals.oauth.serverToken:''%>"/>
+        <b>redirectUri</b> <i><%=locals.oauth?locals.oauth.redirectUri:''%></i>
+    <input type="submit" value="Save"/>
+    </div>
+</form>
+
+</body>
+</html>

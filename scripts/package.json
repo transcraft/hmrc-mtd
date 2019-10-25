@@ -1,0 +1,28 @@
+{
+  "name": "mtd",
+  "version": "1.0.0",
+  "description": "Transcraft MTD",
+  "main": "index.js",
+  "dependencies": {
+    "authenticator": "^1.1.5",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "hello-app": "node ./hello_app",
+    "encrypt": "node ./encrypt",
+    "decrypt": "node ./decrypt",
+    "gen-id": "node ./generateSecureId",
+    "val-id": "node ./validateSecureId",
+    "gen-token": "node ./generateToken",
+    "val-token": "node ./validateToken",
+    "gen-pw": "node ./generatePassword",
+    "val-pw": "node ./validatePassword"
+  },
+  "keywords": [
+    "transcraft",
+    "mtd"
+  ],
+  "author": "Transcraft Trading Limited",
+  "license": "ISC"
+}

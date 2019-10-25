@@ -1,0 +1,28 @@
+{
+  "name": "transcraft-mtd",
+  "version": "1.0.0",
+  "description": "Transcraft MTD UI",
+  "main": "index.js",
+  "dependencies": {
+    "connect-flash": "^0.1.1",
+    "cookie-session": "^2.0.0-beta.3",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "morgan": "^1.9.1",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "request": "^2.88.0",
+    "superagent": "^4.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "MTD_ENV=live node ./bin/mtd",
+    "test": "MTD_ENV=test node ./bin/mtd"
+  },
+  "keywords": [
+    "transcraft",
+    "mtd"
+  ],
+  "author": "Transcraft Trading Limited",
+  "license": "ISC"
+}

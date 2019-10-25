@@ -1,0 +1,91 @@
+<%
+function mapColumnValue(responseMap, row, k) {
+    try {
+        if (!row) {
+            return "";
+        }
+        var v = row[k];
+        if (!responseMap || !responseMap.hasOwnProperty(k)) {
+            return v;
+        }
+        if (typeof(responseMap[k]) === 'function') {
+            var func = responseMap[k];
+            return func(row, k);
+        }
+        return '<a href="' + util.buildUrl(responseMap[k], row) + '">' + v + '</a>';
+    } catch(e) {
+        console.log('mapColumnValue('+k+')', e);
+        return "";
+    }
+}
+ %>
+<% if (Array.isArray(locals.entity)) {
+    if (locals.entity.length > 0 && locals.entity[0].constructor != Object) {
+%>
+        <ul>
+            <% for (var i in locals.entity) { %>
+                <li><%= locals.entity[i] %></li>
+            <% } %>
+        </ul>
+<%
+    } else {
+        var columns = locals.columns ? locals.columns : Object.keys(locals.entity[0]);
+        console.log('columns='+JSON.stringify(columns));
+%>
+    <table class="tablesorter">
+        <thead>
+        <tr>
+            <% for (var k in columns) {
+                var column = columns[k];
+            %>
+                <th><%= util.prettifyCamelCase(column) %></th>
+            <% } %>
+        </tr>
+        </thead>
+        <tbody>
+        <%
+        for (var i in locals.entity) {
+            var row = locals.entity[i];
+        %>
+        <tr>
+            <% for (var k in columns) {
+                var column = columns[k];
+                var v = row[column];
+                if (locals.postProcessor) { locals.postProcessor(column, v); }
+                if (locals.excludes && locals.excludes.includes(column)) { continue; }
+            %>
+            <td>
+                <% if (typeof(v) === 'object') { %>
+                    <%- include('_entity.ejs', { entity: v }); %>
+                <% } else { %>
+                    <%- mapColumnValue(locals.responseMap, row, column) %>
+                <% } %>
+            </td>
+            <% } %>
+        </tr>
+        <% } %>
+        </tbody>
+    </table>
+<%  }
+} else if (locals.entity.constructor == Object) { %>
+<ul class="entity">
+    <%
+        for (var k in locals.entity) {
+            var v = locals.entity[k];
+            if (locals.postProcessor) { locals.postProcessor(k, v); }
+            if (locals.excludes && locals.excludes.includes(k)) { continue; }
+    %>
+        <li>
+            <b><%= util.prettifyCamelCase(k) %></b>
+            <% if (typeof(v) === 'object') { %>
+                <%- include('_entity.ejs', { entity: v }); %>
+            <% } else { %>
+                <%- mapColumnValue(locals.responseMap, locals.entity, k) %>
+            <% } %>
+        </li>
+    <% } %>
+</ul>
+<% } else { %>
+    <%= locals.entity.toString() %>
+<% } %>
+

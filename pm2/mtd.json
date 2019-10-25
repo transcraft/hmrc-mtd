@@ -1,0 +1,21 @@
+{
+  "apps" : [
+  	{
+		"name"        : "transcraft-mtd",
+		"script"      : "./bin/mtd",
+		"args"        : [],
+		"node_args"   : "",
+		"cwd"         : "../server/",
+		"env": {
+			"MTD_ENV": "test",
+			"MTD_PORT": "3030"
+		},
+		"env_live" : {
+			"MTD_ENV": "live",
+			"MTD_PORT": "3040"
+		},
+		"error_file": "./logs/mtd-err.log",
+		"out_file": "./logs/mtd-out.log"
+	}
+  ]
+}

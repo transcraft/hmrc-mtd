@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/css/mtd.css">
+    <script src="/js/mtd.js"></script>
+    <title>[<%= mtdEnv %>] Test Users</title>
+</head>
+<body>
+<%- include _menu.ejs %>
+
+<h2><span class="<%= locals.mtdEnv %>">[<%= locals.mtdEnv %>]</span> Test Users</h2>
+
+<%
+function addLinks(k, v) {
+    if (k !== '_id') { return; }
+    %>
+    <a href="/admin/deleteTestUser/<%= v %>">Delete</a>
+    <%
+}
+ %>
+<ul class="topUl">
+    <% for (var k in users) { %>
+    <li class="topLi">
+
+        <%- include('_entity.ejs', { entity: users[k], postProcessor: addLinks, excludes: [ '_id', 'type' ] }); %>
+
+    </li>
+    <% } %>
+
+</ul>
+
+</body>
+</html>

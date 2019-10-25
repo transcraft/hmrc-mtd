@@ -1,0 +1,21 @@
+<% if (locals.callRes) { %>
+
+    <% var responseMap = (locals.service && locals.service.response) || {} %>
+    <%- include('_entity.ejs', { entity: locals.callRes.body, responseMap: responseMap }); %>
+
+    <p>Request</p>
+    <div class="callRequest">
+        <div>
+            <span>Show</span>
+            <pre class="callRequestBody"><%= JSON.stringify(locals.query, null, 4) %></pre>
+        </div>
+    </div>
+
+    <p>Response</p>
+    <div class="callResponse">
+        <div>
+            <span>Show</span>
+            <pre class="callResponseBody"><%= JSON.stringify(locals.callRes.body, null, 4) %></pre>
+        </div>
+    </div>
+<% } %>

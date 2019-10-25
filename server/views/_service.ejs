@@ -1,0 +1,39 @@
+<% if (locals.service) {
+    var service = locals.service;
+%>
+    <form method="post" <%- service.onsubmit? "onsubmit='" + service.onsubmit + "'" : ""%>>
+        <div class="config">
+
+            <% for (var k in service.request) {
+                if (!Array.isArray(service.request[k])) {
+                    var matches = service.request[k].match(/-(.*?)-/);
+                    if (matches && matches.length > 0) {
+                        %><input type="hidden" name="<%= k %>" value="<%= locals.query[k] %>" /><%
+                        continue;
+                    }
+                }
+            %>
+                <b><%= util.prettifyCamelCase(k) %></b>
+                <% if (Array.isArray(service.request[k])) { %>
+                    <select name="<%= k %>" size="<%= service.request[k].length %>" multiple>
+                        <% for (var i in service.request[k]) { %>
+                            <option <%= locals.query[k] === service.request[k][i] ? 'selected' : '' %>><%= service.request[k][i] %></option>
+                        <% } %>
+                    </select>
+                <% } else if (service.request[k] === 'date') { %>
+                    <input class='date' name="<%= k %>" value="<%= locals.query[k] %>"/>
+                <% } else if (service.request[k] === 'number') { %>
+                    <input class='number' name="<%= k %>" value="<%= locals.query[k] %>"/>
+                <% } else if (service.request[k] === 'boolean') { %>
+                    <span>
+                <input name="<%= k %>" type="radio" value="true" <%= locals.query[k] === 'true' ? 'checked' : '' %>>Yes
+                <input name="<%= k %>" type="radio" value="false" <%= locals.query[k] === 'false' ? 'checked' : '' %>>No
+                    </span>
+                <% } else { %>
+                    <input name="<%= k %>" value="<%= locals.query[k] %>"/>
+                <% } %>
+            <% } %>
+            <input type="submit" value="Submit"/>
+        </div>
+    </form>
+<% } %>

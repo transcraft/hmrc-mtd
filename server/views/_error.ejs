@@ -1,0 +1,8 @@
+<% if (locals.err) { %>
+<p>
+    <div class="error">
+        <%- include('_entity.ejs', { entity: locals.err }); %>
+    </div>
+</p>
+<% } %>
+

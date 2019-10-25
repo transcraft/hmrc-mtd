@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="/css/mtd.css">
+    <title>[<%= locals.mtdEnv %>] Login</title>
+</head>
+<body>
+
+<h2>Log in to Transcraft (to update admin configurations)</h2>
+
+<%- include _error.ejs %>
+
+<form method="post">
+    <div><label><b>User name</b></label></div><div> <input id="username" name="username"></div>
+    <div><label><b>Password</b></label></div><div> <input type="password" id="secret" name="secret"></div>
+    <div><label><b>One Time Passcode (OTP)</b></label></div><div> <input id="otp" name="otp"></div>
+    <div><input type="submit" value="Login"/></div>
+</form>
+
+<a href="createUser">Create new user</a>
+</body>
+</html>
