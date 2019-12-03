@@ -33,19 +33,13 @@ router.get('/oauthCallback', (req, res) => {
             redirect_uri: oauthConfig.redirectUri,
             client_id: oauthConfig.clientId,
             client_secret: oauthConfig.clientSecret,
-            code: req.query.code
+            code: req.query.code,
+            grant_type: 'authorization_code'
         };
 
         const oauth2 = mtd.oauth2(oauthConfig);
+        console.log('Requesting token with options: ', util.dump(options));
         oauth2.authorizationCode.getToken(options)
-            .catch(e => {
-                console.log('Caught error '+util.dump(e));
-                var err = "Failed to obtain access token: " +
-                    (e.data && e.data.payload ? e.data.payload.error_description : e);
-                res.render('serviceResponse', {
-                    err: err
-                });
-            })
             .then((result) => {
                 console.log('Got token: ', result);
                 // save token on session and return to calling page
@@ -54,6 +48,14 @@ router.get('/oauthCallback', (req, res) => {
                 delete req.session.caller;
 				console.log('redirect => %s', caller);
                 res.redirect(caller);
+            })
+            .catch(e => {
+                console.log('Caught error '+util.dump(e));
+                var err = "Failed to obtain access token: " +
+                    (e.data && e.data.payload ? e.data.payload.error_description : e);
+                res.render('serviceResponse', {
+                    err: err
+                });
             });
     });
 });
@@ -73,7 +75,7 @@ router.get('/:serviceName', (req, res) => {
 
     console.log('service '+serviceName+'='+JSON.stringify(service));
     db.getOauthConfig(req.user).then(oauthConfig => {
-        console.log('oauthConfig='+JSON.stringify(oauthConfig));
+        console.log('oauthConfig='+util.dump(oauthConfig));
         if (!oauthConfig || util.hasNull(oauthConfig)) {
             req.session.caller = './..' + req.originalUrl;
 			var url = './../admin/oauthConfig';
@@ -135,7 +137,7 @@ router.post('/:serviceName', (req, res) => {
     }
 
     db.getOauthConfig(req.user).then(oauthConfig => {
-        console.log('oauthConfig='+JSON.stringify(oauthConfig));
+        console.log('oauthConfig='+util.dump(oauthConfig));
         if (!oauthConfig || util.hasNull(oauthConfig)) {
 			var url = './../admin/oauthConfig';
 			console.log('redirect => %s', url);
@@ -223,6 +225,7 @@ function populateFraudPreventionHeaders(appConfig, req, apiReq) {
     apiReq.set('Gov-Client-User-IDs', 'os='+req.user);
     apiReq.set('Gov-Client-Timezone', 'UTC'+(tsOffset >= 0 ? '+' : '')+tsOffset);
     apiReq.set('Gov-Client-Local-IPs', '');
+    apiReq.set('Gov-Client-MAC-Addresses', '');
     apiReq.set('Gov-Client-Screens', '');
     apiReq.set('Gov-Client-Window-Size', '');
     apiReq.set('Gov-Client-User-Agent', req.headers['user-agent']);
@@ -234,7 +237,6 @@ function populateFraudPreventionHeaders(appConfig, req, apiReq) {
     apiReq.set('Gov-Vendor-Version', '');
     apiReq.set('Gov-Vendor-License-IDs', '');
     apiReq.set('Gov-Vendor-Public-IP', '');
-    apiReq.set('Gov-Client-MAC-Addresses', '');
     apiReq.set('Gov-Vendor-Forwarded', '');
 }
 
