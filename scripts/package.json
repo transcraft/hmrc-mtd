@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "authenticator": "^1.1.5",
+    "public-ip": "^4.0.1",
     "request": "^2.88.0"
   },
   "devDependencies": {},

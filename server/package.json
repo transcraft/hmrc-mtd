@@ -5,14 +5,15 @@
   "main": "index.js",
   "dependencies": {
     "connect-flash": "^0.1.1",
-    "cookie-session": "^2.0.0-beta.3",
-    "ejs": "^2.6.1",
-    "express": "^4.16.4",
-    "morgan": "^1.9.1",
-    "passport": "^0.4.0",
+    "cookie-session": "^2.0.0-rc.1",
+    "ejs": "^2.7.4",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "passport": "^0.4.1",
     "passport-local": "^1.0.0",
-    "request": "^2.88.0",
-    "superagent": "^4.1.0"
+    "request": "^2.88.2",
+    "superagent": "^4.1.0",
+    "uuid": "^8.2.0"
   },
   "devDependencies": {},
   "scripts": {

@@ -1,11 +1,16 @@
 'use strict';
 
 const superAgent = require('superagent');
-var mtd = require("../../lib/mtd-service");
-var config = require('../../lib/mtd-config');
-var util = require('../../lib/mtd-util');
-var db = require('../../lib/mtd-db');
-var bodyParser  = require('body-parser');
+const mtd = require("../../lib/mtd-service");
+const config = require('../../lib/mtd-config');
+const util = require('../../lib/mtd-util');
+const db = require('../../lib/mtd-db');
+const bodyParser  = require('body-parser');
+const security = require('../../lib/mtd-security');
+const fs = require('fs');
+const path = require("path");
+
+const APP_NAME = "transcraft-mtd";
 
 var express = require('express');
 var router = express.Router();
@@ -210,34 +215,66 @@ function callApi(req, res, service, oauthConfig, appConfig) {
 }
 
 function populateFraudPreventionHeaders(appConfig, req, apiReq) {
-    var ts = req.session.loginTimestamp;
-    var tsOffset = (new Date().getTimezoneOffset() / 60) * -1;
-    console.log('TimeZoneOffset='+tsOffset);
-    apiReq.set('Gov-Client-Connection-Method', 'WEB_APP_VIA_SERVER');
-    apiReq.set('Gov-Client-Public-IP', req.headers['x-forwarded-for'] ||
+    if (config.env === 'test') {
+        let fn = path.join(config.dataFolder, req.user + "-request.json");
+        fs.writeFile(fn, util.dump(req), (err) => {
+            if (err) {
+                console.error("%s: %s", fn, err);
+            }
+        });
+    }
+
+    let ts = req.session.loginTimestamp? req.session.loginTimestamp : new Date().toISOString();
+    let myPublicIp = util.myPublicIp();
+    // HMRC do not accept milliseconds in the timestamp
+    ts = ts.split('.')[0]+'Z';
+    let remoteAddress = req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress ||
-        req.connection.socket.remoteAddres || '');
-    apiReq.set('Gov-Client-Public-Port', req.connection.remotePort ||
+        req.connection.socket.remoteAddres || '';
+    if (remoteAddress.substr(0, 7) == "::ffff:") {
+        remoteAddress = remoteAddress.substr(7)
+    }
+    if (remoteAddress === '127.0.0.1') {
+        // convert 'localhost' into the actual IP
+        remoteAddress = myPublicIp;
+    }
+    let remotePort = req.connection.remotePort ||
         req.socket.remotePort ||
-        req.connection.socket.remotePort || '');
-    apiReq.set('Gov-Client-Device-ID', req.user);
-    apiReq.set('Gov-Client-User-IDs', 'os='+req.user);
-    apiReq.set('Gov-Client-Timezone', 'UTC'+(tsOffset >= 0 ? '+' : '')+tsOffset);
-    apiReq.set('Gov-Client-Local-IPs', '');
-    apiReq.set('Gov-Client-MAC-Addresses', '');
-    apiReq.set('Gov-Client-Screens', '');
-    apiReq.set('Gov-Client-Window-Size', '');
-    apiReq.set('Gov-Client-User-Agent', req.headers['user-agent']);
-    apiReq.set('Gov-Client-Browser-Plugins', '');
+        req.connection.socket.remotePort || '';
+
+    apiReq.set('Gov-Client-Connection-Method', 'WEB_APP_VIA_SERVER');
+    apiReq.set('Gov-Client-Public-IP', remoteAddress);
+    apiReq.set('Gov-Client-Public-Port', remotePort);
+    apiReq.set('Gov-Client-Device-ID', req.session.uniqueId);
+    apiReq.set('Gov-Client-User-IDs', APP_NAME+'='+req.user);
+    // TODO send the timezone info to the server from client side, using the server offset for now
+    let tsOffset = (new Date().getTimezoneOffset() / 60) * -1;
+    apiReq.set('Gov-Client-Timezone', 'UTC'+(tsOffset >= 0 ? '+' : '')+(tsOffset < 10 ? '0' : '')+tsOffset+':00');
+    let localIps = util.myIps.filter(ip => ip.iface !== 'lo');
+    apiReq.set('Gov-Client-Local-IPs', localIps.map(ip => encodeURIComponent(ip.address)).join(','));
+    // no way to figure this out, but HMRC insists on it
+    apiReq.set('Gov-Client-Screens', 'width=1920&height=1080&scaling-factor=1&colour-depth=16,width=3000&height=2000&scaling-factor=1.25&colour-depth=16');
+    // no way to figure this out, but HMRC insists on it
+    apiReq.set('Gov-Client-Window-Size', 'width=1920&height=1080');
+    // no way to figure this out, but HMRC insists on it
+    apiReq.set('Gov-Client-Browser-Plugins', 'none');
     apiReq.set('Gov-Client-Browser-JS-User-Agent', req.headers['user-agent']);
     apiReq.set('Gov-Client-Browser-Do-Not-Track', 'false');
-    apiReq.set('Gov-Client-Multi-Factor', 'type=AUTH_CODE&timestamp='+ts+'&unique-reference='+
-        req.user+',type=TOTP&timestamp='+ts+'&unique-reference='+req.session.loginOtp);
-    apiReq.set('Gov-Vendor-Version', '');
-    apiReq.set('Gov-Vendor-License-IDs', '');
-    apiReq.set('Gov-Vendor-Public-IP', '');
-    apiReq.set('Gov-Vendor-Forwarded', '');
+    apiReq.set('Gov-Client-Multi-Factor', 'type=AUTH_CODE'+
+        '&timestamp='+encodeURIComponent(ts)+
+        '&unique-reference='+req.user+
+        ',type=TOTP'+
+        '&timestamp='+encodeURIComponent(ts)+
+        '&unique-reference='+req.session.loginOtp);
+    // TODO hardcode for now        
+    apiReq.set('Gov-Vendor-Version', APP_NAME+'='+encodeURIComponent('2.1.0')+
+        '&client='+encodeURIComponent('1.0.0'));
+    let hashedId = security.makeHash(APP_NAME);
+    apiReq.set('Gov-Vendor-License-IDs', APP_NAME+'='+encodeURIComponent(hashedId));
+    apiReq.set('Gov-Vendor-Public-IP', myPublicIp);
+    // TODO assumption here is the web server is public facing. Please tweak this if you are behind a proxy
+    apiReq.set('Gov-Vendor-Forwarded', 'by='+encodeURIComponent(myPublicIp)+'&for='+encodeURIComponent(myPublicIp));
 }
 
 function handlerServiceCallResponse(service, req, res, err, callRes) {

@@ -1,13 +1,14 @@
 'use strict';
 
-var util = require('../../lib/mtd-util');
-var security = require('../../lib/mtd-security');
-var config = require('../../lib/mtd-config');
-var db = require('../../lib/mtd-db');
+const util = require('../../lib/mtd-util');
+const security = require('../../lib/mtd-security');
+const config = require('../../lib/mtd-config');
+const db = require('../../lib/mtd-db');
 const superAgent = require('superagent');
-var passport = require('passport');
-var Strategy = require('passport-local').Strategy;
-var bodyParser  = require('body-parser');
+const passport = require('passport');
+const Strategy = require('passport-local').Strategy;
+const bodyParser  = require('body-parser');
+const uuidV4 = require('uuid').v4;
 
 const RECAPTCHA_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
@@ -24,8 +25,10 @@ passport.use('otp-local', new Strategy({
                } else {
                    if (security.validateOtp(security.makeSecret(user, appConfig.otpSeed, true),
                        req.body.otp, true)) {
+                        //set up session sepcific values, to be used while the session is valid
                        req.session.loginTimestamp = new Date().toISOString();
                        req.session.loginOtp = appConfig.otpSeed;
+                       req.session.uniqueId = uuidV4();
                        return done(null, user);
                    } else {
                        return done('Authentication failed (code 0x913)');

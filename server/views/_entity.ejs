@@ -85,6 +85,8 @@ function mapColumnValue(responseMap, row, k) {
         </li>
     <% } %>
 </ul>
+<% } else if (locals.entity.getMonth) { %>
+    <%= locals.entity.toISOString() %>
 <% } else { %>
     <%= locals.entity.toString() %>
 <% } %>
