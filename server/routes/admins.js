@@ -8,7 +8,6 @@ const superAgent = require('superagent');
 const passport = require('passport');
 const Strategy = require('passport-local').Strategy;
 const bodyParser  = require('body-parser');
-const uuidV4 = require('uuid').v4;
 
 const RECAPTCHA_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
@@ -28,7 +27,6 @@ passport.use('otp-local', new Strategy({
                         //set up session sepcific values, to be used while the session is valid
                        req.session.loginTimestamp = new Date().toISOString();
                        req.session.loginOtp = appConfig.otpSeed;
-                       req.session.uniqueId = uuidV4();
                        return done(null, user);
                    } else {
                        return done('Authentication failed (code 0x913)');
@@ -175,6 +173,9 @@ router.get('/logout', (req,res) => {
         delete req.session.user;
         // force a log out of HMRC too
         delete req.session.oauth2Token;
+        delete req.session.uniqueId;
+        delete req.session.loginTimestamp;
+        delete req.session.loginOtp;
         req.logout();
     }
     var url = './../';

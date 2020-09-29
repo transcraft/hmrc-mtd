@@ -235,8 +235,8 @@ function populateFraudPreventionHeaders(appConfig, req, apiReq) {
     if (remoteAddress.substr(0, 7) == "::ffff:") {
         remoteAddress = remoteAddress.substr(7)
     }
-    if (remoteAddress === '127.0.0.1') {
-        // convert 'localhost' into the actual IP
+    if (remoteAddress === '127.0.0.1' || remoteAddress.match(/^192\.168|::1/)) {
+        // convert 'localhost' or local server ip into the actual IP
         remoteAddress = myPublicIp;
     }
     let remotePort = req.connection.remotePort ||
@@ -274,7 +274,7 @@ function populateFraudPreventionHeaders(appConfig, req, apiReq) {
     apiReq.set('Gov-Vendor-License-IDs', APP_NAME+'='+encodeURIComponent(hashedId));
     apiReq.set('Gov-Vendor-Public-IP', myPublicIp);
     // TODO assumption here is the web server is public facing. Please tweak this if you are behind a proxy
-    apiReq.set('Gov-Vendor-Forwarded', 'by='+encodeURIComponent(myPublicIp)+'&for='+encodeURIComponent(myPublicIp));
+    apiReq.set('Gov-Vendor-Forwarded', 'by='+encodeURIComponent(myPublicIp)+'&for='+encodeURIComponent(remoteAddress));
 }
 
 function handlerServiceCallResponse(service, req, res, err, callRes) {

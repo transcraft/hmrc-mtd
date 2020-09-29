@@ -34,12 +34,14 @@
                 <li><a href="/admin/appConfig">Application</a></li>
                 <li><a href="/admin/oauthConfig">Open Authentication (oauth2)</a></li>
                 <li><a href="/admin/updatePassword">Update Password</a></li>
-                <li><a href="/admin/logout">Logout</a></li>
             <% } %>
             <% if (locals.req && locals.req.session.oauth2Token) { %>
                 <li><a href="/admin/resetToken">Logout (of HMRC)</a></li>
             <% } %>
-        </ul>
+            <% if (locals.user) { %>
+                <li><a href="/admin/logout">Logout</a></li>
+            <% } %>
+            </ul>
     </div>
 </div>
 <span>

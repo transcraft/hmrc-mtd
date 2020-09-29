@@ -4,6 +4,7 @@ var morgan = require('morgan');
 var cookieSession = require("cookie-session");
 var passport = require('passport');
 var flash = require("connect-flash");
+const uuidV4 = require('uuid').v4;
 
 var mtd = require("../lib/mtd-service");
 var config = require('../lib/mtd-config');
@@ -31,6 +32,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use((req, res, next) => {
+    if (!req.session.uniqueId) {
+        req.session.uniqueId = uuidV4();
+    }
     res.locals = {
         mtdEnv: config.env,
         menu: mtd.myMenu(),
